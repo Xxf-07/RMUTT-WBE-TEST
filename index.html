@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบแจ้งข่าวสารคณะวิทยาศาสตร์ฯ RMUTT</title>
+    <title>ระบบแจ้งข่าวสารคณะวิทยาศาสตร์ฯ (Real-time Online)</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icons & Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Sarabun', sans-serif; scroll-behavior: smooth; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        .admin-only { display: none; }
-        body.is-admin .admin-only { display: block; }
+        .admin-element { display: none; }
+        body.is-admin .admin-element { display: block; }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800" id="mainBody">
@@ -22,25 +25,26 @@
     <!-- Loading Screen -->
     <div id="loader" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loadingStatus" class="text-blue-900 font-bold">กำลังเชื่อมต่อฐานข้อมูลออนไลน์...</p>
+        <p id="loadingStatus" class="text-blue-900 font-bold">กำลังเชื่อมต่อระบบฐานข้อมูล...</p>
+        <div id="errorMessage" class="hidden mt-4 p-3 bg-red-50 text-red-600 text-xs rounded border border-red-200 mx-4 max-w-sm text-center"></div>
     </div>
 
     <!-- Login Page -->
-    <div id="loginPage" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center space-y-6 animate-fade-in">
+    <div id="loginPage" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full text-center space-y-6 animate-fade-in">
             <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg p-2 border-4 border-blue-50">
                 <img src="https://sci.rmutt.ac.th/wp-content/uploads/2022/03/logo-e1646837687857.png" alt="Logo" class="w-full h-full object-contain">
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 leading-tight">ระบบข่าวสารคณะวิทย์ฯ</h1>
-                <p class="text-gray-500 mt-2">โปรดเลือกสถานะเข้าใช้งาน</p>
+                <p class="text-gray-500 mt-1">RMUTT Science Online</p>
             </div>
             
-            <div class="space-y-4">
-                <button onclick="enterAs('user')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-3">
+            <div class="space-y-3">
+                <button onclick="enterSite('user')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
                     <i class="fas fa-user"></i> เข้าใช้งานทั่วไป (User)
                 </button>
-                <button onclick="enterAs('admin')" class="w-full bg-slate-800 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-3">
+                <button onclick="enterSite('admin')" class="w-full bg-slate-800 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
                     <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ (Admin)
                 </button>
             </div>
@@ -49,80 +53,80 @@
 
     <!-- Main Content Area -->
     <div id="appUI" class="hidden">
+        <!-- Navbar -->
         <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all border-b" id="navbar">
-            <div class="container mx-auto px-4">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
-                        <img src="https://sci.rmutt.ac.th/wp-content/uploads/2022/03/logo-e1646837687857.png" alt="Logo" class="h-10">
-                        <span class="text-xl font-bold text-blue-900 hidden md:block">ข่าวสารคณะวิทย์ฯ</span>
-                    </div>
-                    <div class="hidden lg:flex space-x-1 overflow-x-auto hide-scroll text-gray-600">
-                        <a href="https://www.rmutt.ac.th/2025/01/31/carlendar-rmutt/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ปฏิทินการศึกษา</a>
-                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScWlp6GiZMYMd7v4VeD2CV3dg1PrdQMPrwe7-Y0y_DNYyE1fg/viewform" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ลงทะเบียน</a>
-                        <a href="https://sci.rmutt.ac.th/sci-dashboard/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">สมัครเมลล์</a>
-                        <a href="https://it.rmutt.ac.th/?page_id=2696" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">รีเซ็ท Wifi</a>
-                        <a href="https://activity.rmutt.ac.th/login.php" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">เช็คกิจกรรม</a>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div id="roleIndicator" class="hidden px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded">ADMIN</div>
-                        <button onclick="window.location.reload()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-power-off text-lg"></i></button>
-                    </div>
+            <div class="container mx-auto px-4 flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
+                    <img src="https://sci.rmutt.ac.th/wp-content/uploads/2022/03/logo-e1646837687857.png" alt="Logo" class="h-10">
+                    <span class="text-xl font-bold text-blue-900 hidden md:block">ข่าวสารคณะวิทย์ฯ</span>
+                </div>
+                <!-- Nav Links -->
+                <div class="hidden lg:flex space-x-1 overflow-x-auto hide-scroll text-gray-600">
+                    <a href="https://www.rmutt.ac.th/2025/01/31/carlendar-rmutt/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ปฏิทินการศึกษา</a>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScWlp6GiZMYMd7v4VeD2CV3dg1PrdQMPrwe7-Y0y_DNYyE1fg/viewform" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ลงทะเบียน</a>
+                    <a href="https://sci.rmutt.ac.th/sci-dashboard/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">สมัครเมลล์</a>
+                    <a href="https://it.rmutt.ac.th/?page_id=2696" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">รีเซ็ท Wifi</a>
+                    <a href="https://activity.rmutt.ac.th/login.php" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">เช็คกิจกรรม</a>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="adminBadge" class="hidden px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded uppercase">Admin</div>
+                    <button onclick="window.location.reload()" class="bg-gray-100 p-2 rounded-full hover:bg-red-50 hover:text-red-500 transition"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </nav>
 
         <div class="pt-20 pb-12 space-y-12">
-            <!-- Admin Interface -->
-            <div class="admin-only container mx-auto px-4 animate-fade-in">
+            <!-- Admin Dashboard -->
+            <div class="admin-element container mx-auto px-4 animate-fade-in">
                 <div class="bg-red-50 border-2 border-red-100 rounded-3xl p-6 shadow-sm">
-                    <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center gap-2"><i class="fas fa-tools"></i> จัดการเนื้อหา</h2>
+                    <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center gap-2"><i class="fas fa-tools"></i> ระบบจัดการเนื้อหา</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">ประกาศสไลด์ (Post 3)</h3>
-                            <input type="text" id="p3Img" placeholder="URL รูปภาพ" class="w-full border p-2 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-blue-100 outline-none">
-                            <button onclick="saveP3()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-bold shadow-md transition">เพิ่มสไลด์</button>
+                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">1. ประกาศข่าวภาพ (โพสต์ 3)</h3>
+                            <input type="text" id="p3Img" placeholder="URL รูปภาพ (3840x2160)" class="w-full border p-2 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-blue-100 outline-none">
+                            <button onclick="saveP3()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">เพิ่มสไลด์</button>
                         </div>
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">ข่าวแนะนำ (Post 2)</h3>
-                            <input type="text" id="p2Title" placeholder="หัวข้อ" class="w-full border p-2 rounded-xl mb-2 text-sm">
+                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">2. ข่าวแนะนำสั้น (โพสต์ 2)</h3>
+                            <input type="text" id="p2Title" placeholder="หัวข้อข่าว" class="w-full border p-2 rounded-xl mb-2 text-sm">
                             <input type="text" id="p2Img" placeholder="URL รูปภาพ" class="w-full border p-2 rounded-xl mb-3 text-sm">
-                            <button onclick="saveP2()" class="w-full bg-green-600 text-white py-2 rounded-xl text-sm font-bold shadow-md transition">เพิ่มข่าวแนะนำ</button>
+                            <button onclick="saveP2()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">เพิ่มข่าวแนะนำ</button>
                         </div>
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">โพสต์หลัก (Post 1)</h3>
-                            <input type="text" id="p1Title" placeholder="หัวข้อ" class="w-full border p-2 rounded-xl mb-2 text-sm">
-                            <textarea id="p1Content" placeholder="เนื้อหา..." class="w-full border p-2 rounded-xl mb-2 text-sm h-16"></textarea>
-                            <input type="text" id="p1Img" placeholder="URL รูปภาพ" class="w-full border p-2 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-blue-100 outline-none">
-                            <button onclick="saveP1()" class="w-full bg-purple-600 text-white py-2 rounded-xl text-sm font-bold shadow-md transition">โพสต์ข่าว</button>
+                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">3. โพสต์หลักข่าวสาร (โพสต์ 1)</h3>
+                            <input type="text" id="p1Title" placeholder="หัวข้อหลัก" class="w-full border p-2 rounded-xl mb-2 text-sm font-bold">
+                            <textarea id="p1Content" placeholder="รายละเอียดข่าวสาร..." class="w-full border p-2 rounded-xl mb-2 text-sm h-16"></textarea>
+                            <input type="text" id="p1Img" placeholder="URL รูปภาพ (ถ้ามี)" class="w-full border p-2 rounded-xl mb-3 text-sm">
+                            <button onclick="saveP1()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">โพสต์ลงหน้าหลัก</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- News Slider -->
+            <!-- News Slider (Post 3) -->
             <section class="container mx-auto px-4 relative group">
-                <h2 class="text-2xl font-bold mb-5 border-l-8 border-yellow-500 pl-4 text-blue-950">ประกาศข่าวคณะ</h2>
+                <h2 class="text-2xl font-bold mb-5 border-l-8 border-yellow-500 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-bullhorn text-yellow-500"></i> ประกาศข่าวคณะ</h2>
                 <div class="relative overflow-hidden rounded-3xl shadow-2xl aspect-[16/9] md:aspect-[21/9] bg-slate-200">
                     <div id="slider" class="flex transition-transform duration-1000 ease-in-out h-full">
                         <div class="w-full h-full flex items-center justify-center text-slate-400 italic">กำลังเชื่อมต่อข้อมูล...</div>
                     </div>
-                    <button onclick="slide(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/20 text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition"><i class="fas fa-chevron-left"></i></button>
-                    <button onclick="slide(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/20 text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition"><i class="fas fa-chevron-right"></i></button>
+                    <button onclick="slide(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition duration-500"><i class="fas fa-chevron-left text-xl"></i></button>
+                    <button onclick="slide(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition duration-500"><i class="fas fa-chevron-right text-xl"></i></button>
                 </div>
             </section>
 
-            <!-- Recommended Scroll -->
+            <!-- Recommended Scroll (Post 2) -->
             <section class="container mx-auto px-4">
-                <h2 class="text-2xl font-bold mb-6 border-l-8 border-green-500 pl-4 text-blue-950">แนะนำข่าวสาร</h2>
+                <h2 class="text-2xl font-bold mb-6 border-l-8 border-green-500 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-star text-green-500"></i> แนะนำข่าว</h2>
                 <div id="recommendedScroll" class="flex space-x-6 overflow-x-auto hide-scroll pb-6 snap-x snap-mandatory min-h-[150px]">
-                    <div class="text-slate-400 w-full text-center py-10 italic">ไม่มีข้อมูลแนะนำในขณะนี้</div>
+                    <div class="text-slate-400 w-full text-center py-10 italic">ไม่มีข้อมูลแนะนำ</div>
                 </div>
             </section>
 
-            <!-- Main Feed -->
+            <!-- Main Feed (Post 1) -->
             <section class="container mx-auto px-4 max-w-4xl pb-20">
-                <h2 class="text-2xl font-bold mb-8 border-l-8 border-indigo-600 pl-4 text-blue-950">ข่าวสารทั่วไป</h2>
-                <div id="mainFeed" class="space-y-10 min-h-[400px]">
+                <h2 class="text-2xl font-bold mb-8 border-l-8 border-indigo-600 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-newspaper text-indigo-600"></i> ข่าวสารกิจกรรม</h2>
+                <div id="mainFeed" class="space-y-10 min-h-[300px]">
                     <div class="text-slate-400 w-full text-center py-20 italic">ยังไม่มีโพสต์ข่าวสาร...</div>
                 </div>
             </section>
@@ -131,12 +135,12 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- FIREBASE CONFIG ---
-        // ตรวจสอบ API Key ใน Firebase Console ให้แน่ใจว่าไม่มีข้อจำกัด (Restrictions)
+        // ใช้รหัสจากระบบจำลองหากมีอยู่ มิเช่นนั้นให้ใช้รหัสที่ระบุไว้
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyD5GDaenSecdvgyskLCoTtPibPDP7JVXw8",
             authDomain: "rmutt-data.firebaseapp.com",
@@ -153,14 +157,14 @@
         let slideIndex = 0;
         let slideData = [];
 
-        // --- INITIALIZATION (Rule 3: Auth Before Queries) ---
-        async function initApp() {
+        // --- INITIALIZATION ---
+        async function startApp() {
             try {
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // ยืนยันตัวตนก่อนเริ่มดึงข้อมูล
+                // ยืนยันตัวตนก่อนเริ่มดึงข้อมูล (Mandatory Rule 3)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -170,55 +174,64 @@
                 onAuthStateChanged(auth, (currentUser) => {
                     if (currentUser) {
                         user = currentUser;
-                        startDataSync();
+                        console.log("Connected to Cloud:", user.uid);
+                        startSync(); // เริ่มซิงค์ข้อมูลหลังจากล็อกอินสำเร็จ
                         document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
                         document.getElementById('loginPage').classList.remove('hidden');
                     }
                 });
             } catch (err) {
-                console.error("Firebase Init Error:", err);
-                document.getElementById('loadingStatus').innerHTML = `<span class="text-red-600 text-sm">เชื่อมต่อล้มเหลว: ${err.message}<br>โปรดตรวจสอบ API Key ใน Firebase Console</span>`;
+                console.error("Firebase Error:", err);
+                const errBox = document.getElementById('errorMessage');
+                errBox.classList.remove('hidden');
+                errBox.innerHTML = `<strong>เชื่อมต่อฐานข้อมูลล้มเหลว:</strong> ${err.message}<br><br>โปรดตรวจสอบการเปิดใช้งาน Anonymous Auth ใน Firebase Console`;
+                document.getElementById('loadingStatus').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
             }
         }
 
-        initApp();
+        startApp();
 
         // --- DATA SYNC (Rule 1 & 2) ---
-        function startDataSync() {
+        function startSync() {
             if (!user) return;
 
-            const pathP3 = collection(db, 'artifacts', appId, 'public', 'data', 'p3');
-            const pathP2 = collection(db, 'artifacts', appId, 'public', 'data', 'p2');
-            const pathP1 = collection(db, 'artifacts', appId, 'public', 'data', 'p1');
+            // การใช้ Path ตามกฎ Strict Paths (Rule 1)
+            const pathP3 = collection(db, 'artifacts', appId, 'public', 'data', 'banners');
+            const pathP2 = collection(db, 'artifacts', appId, 'public', 'data', 'recommends');
+            const pathP1 = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
 
+            // ซิงค์ข้อมูลแบนเนอร์ (Post 3)
             onSnapshot(pathP3, (snap) => {
                 slideData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderP3();
             }, err => console.error("Sync P3 Error:", err));
 
+            // ซิงค์ข้อมูลข่าวแนะนำ (Post 2)
             onSnapshot(pathP2, (snap) => {
                 const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderP2(data);
-            });
+            }, err => console.error("Sync P2 Error:", err));
 
+            // ซิงค์ข้อมูลโพสต์หลัก (Post 1)
             onSnapshot(pathP1, (snap) => {
                 const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); // Memory sort (Rule 2)
+                // ทำการเรียงลำดับในฝั่ง JavaScript (Rule 2)
+                data.sort((a, b) => (b.time || 0) - (a.time || 0));
                 renderP1(data);
-            });
+            }, err => console.error("Sync P1 Error:", err));
         }
 
         // --- RENDERING ---
         function renderP3() {
             const el = document.getElementById('slider');
             if (slideData.length === 0) {
-                el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-slate-400 italic">ยังไม่มีประกาศ...</div>`;
+                el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-slate-400 italic">ยังไม่มีประกาศประกาศข่าว</div>`;
                 return;
             }
             el.innerHTML = slideData.map(b => `
                 <div class="w-full h-full flex-shrink-0 relative">
                     <img src="${b.img}" class="w-full h-full object-cover">
-                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('p3', '${b.id}')" class="absolute top-4 right-4 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-trash"></i></button>` : ''}
+                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('banners', '${b.id}')" class="absolute top-4 right-4 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
             `).join('');
             slideIndex = 0;
@@ -228,14 +241,14 @@
         function renderP2(data) {
             const el = document.getElementById('recommendedScroll');
             if (data.length === 0) {
-                el.innerHTML = `<div class="w-full text-center py-10 text-slate-400">ยังไม่มีข้อมูลแนะนำ</div>`;
+                el.innerHTML = `<div class="text-slate-400 w-full text-center py-10">ไม่มีข้อมูลแนะนำในขณะนี้</div>`;
                 return;
             }
             el.innerHTML = data.map(n => `
-                <div class="snap-start flex-shrink-0 w-64 md:w-80 bg-white rounded-3xl shadow-lg overflow-hidden border relative group">
-                    <img src="${n.img}" class="h-40 md:h-48 w-full object-cover group-hover:scale-110 transition duration-500">
+                <div class="snap-start flex-shrink-0 w-64 md:w-80 bg-white rounded-3xl shadow-lg overflow-hidden border border-white relative group">
+                    <img src="${n.img}" class="h-40 md:h-48 w-full object-cover group-hover:scale-105 transition duration-500">
                     <div class="p-5"><p class="font-bold text-gray-800 leading-tight">${n.title}</p></div>
-                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('p2', '${n.id}')" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>` : ''}
+                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('recommends', '${n.id}')" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 transition"><i class="fas fa-trash text-[8px]"></i></button>` : ''}
                 </div>
             `).join('');
         }
@@ -243,7 +256,7 @@
         function renderP1(data) {
             const el = document.getElementById('mainFeed');
             if (data.length === 0) {
-                el.innerHTML = `<div class="text-center py-20 text-slate-400 italic">ยังไม่มีข่าวสารในขณะนี้...</div>`;
+                el.innerHTML = `<div class="text-center py-20 text-slate-400 italic">ยังไม่มีโพสต์ข่าวสารในขณะนี้...</div>`;
                 return;
             }
             el.innerHTML = data.map(p => `
@@ -254,43 +267,43 @@
                                 <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-bullhorn"></i></div>
                                 <div>
                                     <h3 class="font-bold text-2xl text-blue-950 leading-tight">${p.title}</h3>
-                                    <p class="text-xs text-slate-400 mt-1">${new Date(p.createdAt || Date.now()).toLocaleDateString('th-TH')}</p>
+                                    <p class="text-xs text-slate-400 mt-1">${new Date(p.time || Date.now()).toLocaleDateString('th-TH')}</p>
                                 </div>
                             </div>
-                            ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('p1', '${p.id}')" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-xl"></i></button>` : ''}
+                            ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('posts', '${p.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2"><i class="fas fa-trash-alt text-xl"></i></button>` : ''}
                         </div>
                         <div class="text-slate-600 leading-relaxed whitespace-pre-wrap text-lg mb-6">${p.content}</div>
                     </div>
                     ${p.img ? `<img src="${p.img}" class="w-full h-auto object-cover border-y">` : ''}
                     <div class="px-8 py-5 flex justify-between items-center bg-slate-50/50">
-                        <button onclick="window.likeP1('${p.id}')" class="flex items-center gap-3 text-slate-400 hover:text-pink-600 transition active:scale-125">
+                        <button onclick="window.likePost('${p.id}')" class="flex items-center gap-3 text-slate-400 hover:text-pink-600 transition active:scale-125">
                             <i class="fas fa-heart ${p.likes > 0 ? 'text-pink-500' : ''} text-xl"></i>
-                            <span class="font-bold text-slate-600">${p.likes || 0} ถูกใจ</span>
+                            <span class="font-bold text-slate-600">${p.likes || 0} ไลก์</span>
                         </button>
-                        <button class="text-slate-300 hover:text-blue-600"><i class="fas fa-share-nodes text-xl"></i></button>
+                        <button class="text-slate-300 hover:text-blue-600 transition-colors"><i class="fas fa-share-nodes text-xl"></i></button>
                     </div>
                 </article>
             `).join('');
         }
 
         // --- GLOBAL ACTIONS ---
-        window.enterAs = (role) => {
+        window.enterSite = (role) => {
             if (role === 'admin') {
-                const pass = prompt("รหัสผ่านแอดมิน (1234)");
+                const pass = prompt("ใส่รหัสผ่านแอดมิน (1234)");
                 if (pass !== "1234") return alert("ผิดพลาด!");
                 document.body.classList.add('is-admin');
-                document.getElementById('roleIndicator').classList.remove('hidden');
+                document.getElementById('adminBadge').classList.remove('hidden');
             }
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('appUI').classList.remove('hidden');
-            renderP3(); // Refresh views to show trash icons if admin
             startAutoCycle();
+            renderP3(); // อัปเดต UI เพื่อแสดงปุ่มลบหากเป็นแอดมิน
         };
 
         window.saveP3 = async () => {
             const img = document.getElementById('p3Img').value;
             if (!img || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'p3'), { img, createdAt: Date.now() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'banners'), { img, time: Date.now() });
             document.getElementById('p3Img').value = '';
         };
 
@@ -298,7 +311,7 @@
             const title = document.getElementById('p2Title').value;
             const img = document.getElementById('p2Img').value;
             if (!title || !img || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'p2'), { title, img, createdAt: Date.now() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'recommends'), { title, img, time: Date.now() });
             document.getElementById('p2Title').value = '';
             document.getElementById('p2Img').value = '';
         };
@@ -308,24 +321,26 @@
             const content = document.getElementById('p1Content').value;
             const img = document.getElementById('p1Img').value;
             if (!title || !content || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'p1'), { title, content, img, likes: 0, createdAt: Date.now() });
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), { 
+                title, content, img, likes: 0, time: Date.now() 
+            });
             document.getElementById('p1Title').value = '';
             document.getElementById('p1Content').value = '';
             document.getElementById('p1Img').value = '';
         };
 
         window.delDoc = async (col, id) => {
-            if (!confirm("ลบ?") || !user) return;
+            if (!confirm("คุณต้องการลบใช่หรือไม่?") || !user) return;
             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
         };
 
-        window.likeP1 = async (id) => {
+        window.likePost = async (id) => {
             if (!user) return;
-            const dRef = doc(db, 'artifacts', appId, 'public', 'data', 'p1', id);
-            await updateDoc(dRef, { likes: increment(1) });
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', id);
+            await updateDoc(docRef, { likes: increment(1) });
         };
 
-        // --- UI UTILS ---
+        // --- ANIMATIONS ---
         window.slide = (n) => {
             if (slideData.length === 0) return;
             slideIndex = (slideIndex + n + slideData.length) % slideData.length;
