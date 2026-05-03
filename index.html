@@ -3,364 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบแจ้งข่าวสารคณะวิทยาศาสตร์ฯ (Real-time Online)</title>
-    <!-- Tailwind CSS -->
+    <title>I LOVE MEI / mygf_gms_gbd_privacy</title>
+    <!-- โหลด Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Icons & Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
+    <!-- โหลดฟอนต์สไตล์น่ารักๆ เผื่อกรณีไม่มีฟอนต์ Cihuy -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Mali:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; scroll-behavior: smooth; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        .admin-element { display: none; }
-        body.is-admin .admin-element { display: block; }
+        :root {
+            /* โทนสีหลัก */
+            --bg-color: #0a0a0a;
+            --pink-primary: #ff69b4;
+            --pink-dark: #d81b60;
+            --pink-light: #ffb6c1;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Mali', sans-serif; /* ฟอนต์ภาษาไทยน่ารักๆ */
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ฟอนต์สำหรับ I LOVE MEI (พยายามเรียกใช้ Cihuy ก่อน ถ้าไม่มีจะใช้ Caveat) */
+        .font-cihuy {
+            font-family: 'Cihuy', 'Caveat', cursive;
+        }
+
+        /* การทำพื้นหลังตัวอักษรกระจาย */
+        .bg-text-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-text {
+            position: absolute;
+            color: rgba(255, 105, 180, 0.15); /* สีชมพูโปร่งแสง */
+            font-size: 2rem;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* ตกแต่งการ์ด */
+        .card {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--pink-primary);
+            box-shadow: 0 10px 20px rgba(255, 105, 180, 0.2);
+        }
+
+        /* รูปปกแบบไล่สีแทนรูปภาพจริง */
+        .cover-img {
+            background: linear-gradient(135deg, #2a0815 0%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            border-bottom: 2px solid rgba(255, 105, 180, 0.2);
+        }
+
+        /* อนิเมชั่น Modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-gray-800" id="mainBody">
+<body class="relative">
 
-    <!-- Loading Screen -->
-    <div id="loader" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loadingStatus" class="text-blue-900 font-bold">กำลังเชื่อมต่อระบบฐานข้อมูล...</p>
-        <div id="errorMessage" class="hidden mt-4 p-3 bg-red-50 text-red-600 text-xs rounded border border-red-200 mx-4 max-w-sm text-center"></div>
-    </div>
+    <!-- พื้นหลังข้อความ I LOVE MEI -->
+    <div id="bg-text-container" class="bg-text-container font-cihuy"></div>
 
-    <!-- Login Page -->
-    <div id="loginPage" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full text-center space-y-6 animate-fade-in">
-            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg p-2 border-4 border-blue-50">
-                <img src="https://sci.rmutt.ac.th/wp-content/uploads/2022/03/logo-e1646837687857.png" alt="Logo" class="w-full h-full object-contain">
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800 leading-tight">ระบบข่าวสารคณะวิทย์ฯ</h1>
-                <p class="text-gray-500 mt-1">RMUTT Science Online</p>
-            </div>
+    <!-- แถบด้านบน (Navbar) -->
+    <nav class="relative z-10 border-b border-pink-500/30 bg-black/50 backdrop-blur-md py-4 shadow-[0_4px_15px_rgba(255,105,180,0.1)]">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold font-cihuy text-pink-400 tracking-wider">
+                <span class="text-white">I LOVE</span> MEI
+            </h1>
+            <p class="text-xs text-pink-300 opacity-70 hidden md:block">mygf_gms_gbd_privacy</p>
+        </div>
+    </nav>
+
+    <!-- เนื้อหาหลัก -->
+    <main class="relative z-10 container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl md:text-4xl font-semibold mb-4 text-white">ของขวัญสำหรับ <span class="text-pink-500">MEI</span> 💖</h2>
+            <p class="text-pink-200 opacity-80">เลือกกล่องความทรงจำด้านล่างได้เลย บางกล่องอาจต้องรอเวลาหน่อยนะ!</p>
+        </div>
+
+        <!-- Grid การ์ดตัวเลือก 4 อย่าง -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             
-            <div class="space-y-3">
-                <button onclick="enterSite('user')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
-                    <i class="fas fa-user"></i> เข้าใช้งานทั่วไป (User)
-                </button>
-                <button onclick="enterSite('admin')" class="w-full bg-slate-800 hover:bg-red-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3">
-                    <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ (Admin)
-                </button>
+            <!-- Card 1: Gift Message -->
+            <div class="card rounded-2xl overflow-hidden flex flex-col">
+                <div class="cover-img h-48 w-full">💌</div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="text-xl font-bold text-pink-400 mb-2">Gift Message</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">ข้อความบอกรักและความในใจที่มีให้เธอเสมอ</p>
+                    <!-- อันนี้ให้เปิดได้เลย ไม่มีล็อคเวลา -->
+                    <button onclick="checkAccess('message')" class="w-full py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-colors duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)]">
+                        Go To
+                    </button>
+                </div>
             </div>
+
+            <!-- Card 2: Gift Birthday -->
+            <div class="card rounded-2xl overflow-hidden flex flex-col">
+                <div class="cover-img h-48 w-full">🎂</div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="text-xl font-bold text-pink-400 mb-2">Gift Birthday</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">สุขสันต์วันเกิดนะ! (เปิดได้ 06/07/26)</p>
+                    <button onclick="checkAccess('birthday')" class="w-full py-3 rounded-full border-2 border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white font-semibold transition-colors duration-300">
+                        Go To
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: Anniversary 1 Year -->
+            <div class="card rounded-2xl overflow-hidden flex flex-col">
+                <div class="cover-img h-48 w-full">💍</div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="text-xl font-bold text-pink-400 mb-2">Anniversary 1 Year</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">ครบรอบ 1 ปีของเรา (เปิดได้ 16/04/27)</p>
+                    <button onclick="checkAccess('anniversary')" class="w-full py-3 rounded-full border-2 border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white font-semibold transition-colors duration-300">
+                        Go To
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: Valentineday -->
+            <div class="card rounded-2xl overflow-hidden flex flex-col">
+                <div class="cover-img h-48 w-full">💝</div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="text-xl font-bold text-pink-400 mb-2">Valentineday</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-1">แฮปปี้วาเลนไทน์ที่รัก (เปิดได้ 14/02/27)</p>
+                    <button onclick="checkAccess('valentine')" class="w-full py-3 rounded-full border-2 border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white font-semibold transition-colors duration-300">
+                        Go To
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal แจ้งเตือนเมื่อยังไม่ถึงเวลา -->
+    <div id="lockedModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- ฉากหลังเบลอ -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModalIfAllowed()"></div>
+        
+        <!-- กล่องข้อความ -->
+        <div class="bg-gray-900 border border-pink-500 rounded-3xl p-8 max-w-md w-full relative z-10 shadow-[0_0_30px_rgba(255,105,180,0.3)] modal-animate text-center">
+            <div class="text-5xl mb-4">🔒</div>
+            <h3 class="text-2xl font-bold text-pink-400 mb-2">ยังไม่ถึงเวลาเปิด!</h3>
+            <p class="text-gray-300 mb-8">ยังไม่ถึงวันเวลาที่กำหนด รอก่อนน้าาา 💖</p>
+            
+            <button id="closeModalBtn" class="w-full py-3 rounded-xl bg-gray-700 text-gray-400 font-semibold cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2" disabled>
+                ปิดหน้าต่าง <span id="countdownSpan" class="font-normal">(รอ 3 วินาที)</span>
+            </button>
         </div>
     </div>
 
-    <!-- Main Content Area -->
-    <div id="appUI" class="hidden">
-        <!-- Navbar -->
-        <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all border-b" id="navbar">
-            <div class="container mx-auto px-4 flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
-                    <img src="https://sci.rmutt.ac.th/wp-content/uploads/2022/03/logo-e1646837687857.png" alt="Logo" class="h-10">
-                    <span class="text-xl font-bold text-blue-900 hidden md:block">ข่าวสารคณะวิทย์ฯ</span>
-                </div>
-                <!-- Nav Links -->
-                <div class="hidden lg:flex space-x-1 overflow-x-auto hide-scroll text-gray-600">
-                    <a href="https://www.rmutt.ac.th/2025/01/31/carlendar-rmutt/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ปฏิทินการศึกษา</a>
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScWlp6GiZMYMd7v4VeD2CV3dg1PrdQMPrwe7-Y0y_DNYyE1fg/viewform" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">ลงทะเบียน</a>
-                    <a href="https://sci.rmutt.ac.th/sci-dashboard/" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">สมัครเมลล์</a>
-                    <a href="https://it.rmutt.ac.th/?page_id=2696" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">รีเซ็ท Wifi</a>
-                    <a href="https://activity.rmutt.ac.th/login.php" target="_blank" class="px-3 py-2 text-sm hover:text-blue-600 hover:bg-blue-50 rounded-xl transition whitespace-nowrap">เช็คกิจกรรม</a>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div id="adminBadge" class="hidden px-2 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded uppercase">Admin</div>
-                    <button onclick="window.location.reload()" class="bg-gray-100 p-2 rounded-full hover:bg-red-50 hover:text-red-500 transition"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
-            </div>
-        </nav>
-
-        <div class="pt-20 pb-12 space-y-12">
-            <!-- Admin Dashboard -->
-            <div class="admin-element container mx-auto px-4 animate-fade-in">
-                <div class="bg-red-50 border-2 border-red-100 rounded-3xl p-6 shadow-sm">
-                    <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center gap-2"><i class="fas fa-tools"></i> ระบบจัดการเนื้อหา</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">1. ประกาศข่าวภาพ (โพสต์ 3)</h3>
-                            <input type="text" id="p3Img" placeholder="URL รูปภาพ (3840x2160)" class="w-full border p-2 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-blue-100 outline-none">
-                            <button onclick="saveP3()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">เพิ่มสไลด์</button>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">2. ข่าวแนะนำสั้น (โพสต์ 2)</h3>
-                            <input type="text" id="p2Title" placeholder="หัวข้อข่าว" class="w-full border p-2 rounded-xl mb-2 text-sm">
-                            <input type="text" id="p2Img" placeholder="URL รูปภาพ" class="w-full border p-2 rounded-xl mb-3 text-sm">
-                            <button onclick="saveP2()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">เพิ่มข่าวแนะนำ</button>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-50">
-                            <h3 class="font-bold text-xs text-gray-400 mb-2 uppercase">3. โพสต์หลักข่าวสาร (โพสต์ 1)</h3>
-                            <input type="text" id="p1Title" placeholder="หัวข้อหลัก" class="w-full border p-2 rounded-xl mb-2 text-sm font-bold">
-                            <textarea id="p1Content" placeholder="รายละเอียดข่าวสาร..." class="w-full border p-2 rounded-xl mb-2 text-sm h-16"></textarea>
-                            <input type="text" id="p1Img" placeholder="URL รูปภาพ (ถ้ามี)" class="w-full border p-2 rounded-xl mb-3 text-sm">
-                            <button onclick="saveP1()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-md transition">โพสต์ลงหน้าหลัก</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- News Slider (Post 3) -->
-            <section class="container mx-auto px-4 relative group">
-                <h2 class="text-2xl font-bold mb-5 border-l-8 border-yellow-500 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-bullhorn text-yellow-500"></i> ประกาศข่าวคณะ</h2>
-                <div class="relative overflow-hidden rounded-3xl shadow-2xl aspect-[16/9] md:aspect-[21/9] bg-slate-200">
-                    <div id="slider" class="flex transition-transform duration-1000 ease-in-out h-full">
-                        <div class="w-full h-full flex items-center justify-center text-slate-400 italic">กำลังเชื่อมต่อข้อมูล...</div>
-                    </div>
-                    <button onclick="slide(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition duration-500"><i class="fas fa-chevron-left text-xl"></i></button>
-                    <button onclick="slide(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-4 rounded-full opacity-0 group-hover:opacity-100 transition duration-500"><i class="fas fa-chevron-right text-xl"></i></button>
-                </div>
-            </section>
-
-            <!-- Recommended Scroll (Post 2) -->
-            <section class="container mx-auto px-4">
-                <h2 class="text-2xl font-bold mb-6 border-l-8 border-green-500 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-star text-green-500"></i> แนะนำข่าว</h2>
-                <div id="recommendedScroll" class="flex space-x-6 overflow-x-auto hide-scroll pb-6 snap-x snap-mandatory min-h-[150px]">
-                    <div class="text-slate-400 w-full text-center py-10 italic">ไม่มีข้อมูลแนะนำ</div>
-                </div>
-            </section>
-
-            <!-- Main Feed (Post 1) -->
-            <section class="container mx-auto px-4 max-w-4xl pb-20">
-                <h2 class="text-2xl font-bold mb-8 border-l-8 border-indigo-600 pl-4 text-blue-950 flex items-center gap-2"><i class="fas fa-newspaper text-indigo-600"></i> ข่าวสารกิจกรรม</h2>
-                <div id="mainFeed" class="space-y-10 min-h-[300px]">
-                    <div class="text-slate-400 w-full text-center py-20 italic">ยังไม่มีโพสต์ข่าวสาร...</div>
-                </div>
-            </section>
+    <!-- Modal ความสำเร็จ (สำหรับกล่องที่เปิดได้) -->
+    <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="bg-gray-900 border border-pink-500 rounded-3xl p-8 max-w-md w-full relative z-10 shadow-[0_0_30px_rgba(255,105,180,0.5)] modal-animate text-center">
+            <div class="text-5xl mb-4">🔓💖</div>
+            <h3 class="text-2xl font-bold text-pink-400 mb-2">ถึงเวลาแล้ว!</h3>
+            <p class="text-gray-300 mb-8">คุณสามารถเปิดเข้าไปดูข้อความได้เลย</p>
+            <button onclick="document.getElementById('successModal').classList.add('hidden')" class="w-full py-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)]">
+                เข้าใจแล้ว
+            </button>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // สร้างพื้นหลังตัวอักษร I LOVE MEI แบบกระจาย
+        function generateBackgroundText() {
+            const container = document.getElementById('bg-text-container');
+            const numTexts = 40; // จำนวนตัวอักษรบนหน้าจอ
 
-        // --- FIREBASE CONFIG ---
-        // ใช้รหัสจากระบบจำลองหากมีอยู่ มิเช่นนั้นให้ใช้รหัสที่ระบุไว้
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyD5GDaenSecdvgyskLCoTtPibPDP7JVXw8",
-            authDomain: "rmutt-data.firebaseapp.com",
-            projectId: "rmutt-data",
-            storageBucket: "rmutt-data.firebasestorage.app",
-            messagingSenderId: "199545728419",
-            appId: "1:199545728419:web:2638b4165d105f907f7e16",
-            measurementId: "G-9XLS3B25GT"
-        };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rmutt-data';
-
-        let app, auth, db, user;
-        let slideIndex = 0;
-        let slideData = [];
-
-        // --- INITIALIZATION ---
-        async function startApp() {
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                // ยืนยันตัวตนก่อนเริ่มดึงข้อมูล (Mandatory Rule 3)
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+            for (let i = 0; i < numTexts; i++) {
+                const span = document.createElement('span');
+                span.innerText = "I LOVE MEI";
+                span.className = "floating-text font-cihuy font-bold";
                 
-                onAuthStateChanged(auth, (currentUser) => {
-                    if (currentUser) {
-                        user = currentUser;
-                        console.log("Connected to Cloud:", user.uid);
-                        startSync(); // เริ่มซิงค์ข้อมูลหลังจากล็อกอินสำเร็จ
-                        document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
-                        document.getElementById('loginPage').classList.remove('hidden');
-                    }
-                });
-            } catch (err) {
-                console.error("Firebase Error:", err);
-                const errBox = document.getElementById('errorMessage');
-                errBox.classList.remove('hidden');
-                errBox.innerHTML = `<strong>เชื่อมต่อฐานข้อมูลล้มเหลว:</strong> ${err.message}<br><br>โปรดตรวจสอบการเปิดใช้งาน Anonymous Auth ใน Firebase Console`;
-                document.getElementById('loadingStatus').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+                // สุ่มตำแหน่ง
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                
+                // สุ่มขนาด หมุน และความทึบ
+                const scale = 0.5 + Math.random() * 1.5;
+                const rotation = (Math.random() * 60) - 30; // หมุน -30 ถึง 30 องศา
+                const opacity = 0.05 + Math.random() * 0.15; // 0.05 ถึง 0.20
+
+                span.style.left = `${left}vw`;
+                span.style.top = `${top}vh`;
+                span.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+                span.style.opacity = opacity;
+
+                container.appendChild(span);
             }
         }
 
-        startApp();
+        // เรียกใช้ฟังก์ชันสร้างพื้นหลังตอนโหลดหน้าเว็บ
+        window.onload = generateBackgroundText;
 
-        // --- DATA SYNC (Rule 1 & 2) ---
-        function startSync() {
-            if (!user) return;
+        // กำหนดวันที่เป้าหมาย (Format: YYYY-MM-DDTHH:MM:SS)
+        const targetDates = {
+            'message': new Date(0).getTime(), // ให้เปิดได้ตลอด (อดีต)
+            'birthday': new Date('2026-07-06T00:00:00').getTime(), // 06/07/26
+            'anniversary': new Date('2027-04-16T00:00:00').getTime(), // 16/04/27
+            'valentine': new Date('2027-02-14T00:00:00').getTime()  // 14/02/27
+        };
 
-            // การใช้ Path ตามกฎ Strict Paths (Rule 1)
-            const pathP3 = collection(db, 'artifacts', appId, 'public', 'data', 'banners');
-            const pathP2 = collection(db, 'artifacts', appId, 'public', 'data', 'recommends');
-            const pathP1 = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+        // ตัวแปรสำหรับการนับถอยหลัง Modal
+        let timerInterval;
+        let isModalClosable = false;
 
-            // ซิงค์ข้อมูลแบนเนอร์ (Post 3)
-            onSnapshot(pathP3, (snap) => {
-                slideData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderP3();
-            }, err => console.error("Sync P3 Error:", err));
+        // ฟังก์ชันตรวจสอบการเข้าถึง
+        function checkAccess(type) {
+            const currentDate = new Date().getTime();
+            const unlockDate = targetDates[type];
 
-            // ซิงค์ข้อมูลข่าวแนะนำ (Post 2)
-            onSnapshot(pathP2, (snap) => {
-                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderP2(data);
-            }, err => console.error("Sync P2 Error:", err));
-
-            // ซิงค์ข้อมูลโพสต์หลัก (Post 1)
-            onSnapshot(pathP1, (snap) => {
-                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                // ทำการเรียงลำดับในฝั่ง JavaScript (Rule 2)
-                data.sort((a, b) => (b.time || 0) - (a.time || 0));
-                renderP1(data);
-            }, err => console.error("Sync P1 Error:", err));
-        }
-
-        // --- RENDERING ---
-        function renderP3() {
-            const el = document.getElementById('slider');
-            if (slideData.length === 0) {
-                el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-slate-400 italic">ยังไม่มีประกาศประกาศข่าว</div>`;
-                return;
+            if (currentDate >= unlockDate) {
+                // หากถึงเวลาแล้ว ให้เปิดได้ (ตอนนี้แสดง popup สำเร็จไปก่อน)
+                document.getElementById('successModal').classList.remove('hidden');
+            } else {
+                // หากยังไม่ถึงเวลา ให้โชว์ Modal ล็อค
+                showLockedModal();
             }
-            el.innerHTML = slideData.map(b => `
-                <div class="w-full h-full flex-shrink-0 relative">
-                    <img src="${b.img}" class="w-full h-full object-cover">
-                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('banners', '${b.id}')" class="absolute top-4 right-4 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition"><i class="fas fa-trash"></i></button>` : ''}
-                </div>
-            `).join('');
-            slideIndex = 0;
-            updateSlider();
         }
 
-        function renderP2(data) {
-            const el = document.getElementById('recommendedScroll');
-            if (data.length === 0) {
-                el.innerHTML = `<div class="text-slate-400 w-full text-center py-10">ไม่มีข้อมูลแนะนำในขณะนี้</div>`;
-                return;
+        // ฟังก์ชันแสดง Modal ล็อค
+        function showLockedModal() {
+            const modal = document.getElementById('lockedModal');
+            const closeBtn = document.getElementById('closeModalBtn');
+            const countdownSpan = document.getElementById('countdownSpan');
+            
+            modal.classList.remove('hidden');
+            
+            // รีเซ็ตปุ่ม
+            isModalClosable = false;
+            closeBtn.disabled = true;
+            closeBtn.className = "w-full py-3 rounded-xl bg-gray-700 text-gray-400 font-semibold cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2";
+            
+            let timeLeft = 3;
+            countdownSpan.innerText = `(รอ ${timeLeft} วินาที)`;
+
+            // เคลียร์ Timer เก่า (ถ้ามี)
+            if(timerInterval) clearInterval(timerInterval);
+
+            // เริ่มนับถอยหลัง 3 วิ
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isModalClosable = true;
+                    
+                    // เปลี่ยนสไตล์ปุ่มให้กดได้
+                    closeBtn.disabled = false;
+                    closeBtn.className = "w-full py-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)]";
+                    countdownSpan.innerText = ""; // ซ่อนคำว่า รอ...
+                    
+                    // เพิ่ม event listener สำหรับกดปิด
+                    closeBtn.onclick = forceCloseModal;
+                } else {
+                    countdownSpan.innerText = `(รอ ${timeLeft} วินาที)`;
+                }
+            }, 1000);
+        }
+
+        // ปิดหน้าต่างได้ก็ต่อเมื่อหมดเวลา 3 วินาทีแล้ว (กดที่ฉากหลัง)
+        function closeModalIfAllowed() {
+            if (isModalClosable) {
+                forceCloseModal();
             }
-            el.innerHTML = data.map(n => `
-                <div class="snap-start flex-shrink-0 w-64 md:w-80 bg-white rounded-3xl shadow-lg overflow-hidden border border-white relative group">
-                    <img src="${n.img}" class="h-40 md:h-48 w-full object-cover group-hover:scale-105 transition duration-500">
-                    <div class="p-5"><p class="font-bold text-gray-800 leading-tight">${n.title}</p></div>
-                    ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('recommends', '${n.id}')" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 transition"><i class="fas fa-trash text-[8px]"></i></button>` : ''}
-                </div>
-            `).join('');
         }
 
-        function renderP1(data) {
-            const el = document.getElementById('mainFeed');
-            if (data.length === 0) {
-                el.innerHTML = `<div class="text-center py-20 text-slate-400 italic">ยังไม่มีโพสต์ข่าวสารในขณะนี้...</div>`;
-                return;
-            }
-            el.innerHTML = data.map(p => `
-                <article class="bg-white rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden animate-fade-in relative transition hover:shadow-indigo-100">
-                    <div class="p-8">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-bullhorn"></i></div>
-                                <div>
-                                    <h3 class="font-bold text-2xl text-blue-950 leading-tight">${p.title}</h3>
-                                    <p class="text-xs text-slate-400 mt-1">${new Date(p.time || Date.now()).toLocaleDateString('th-TH')}</p>
-                                </div>
-                            </div>
-                            ${document.body.classList.contains('is-admin') ? `<button onclick="window.delDoc('posts', '${p.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2"><i class="fas fa-trash-alt text-xl"></i></button>` : ''}
-                        </div>
-                        <div class="text-slate-600 leading-relaxed whitespace-pre-wrap text-lg mb-6">${p.content}</div>
-                    </div>
-                    ${p.img ? `<img src="${p.img}" class="w-full h-auto object-cover border-y">` : ''}
-                    <div class="px-8 py-5 flex justify-between items-center bg-slate-50/50">
-                        <button onclick="window.likePost('${p.id}')" class="flex items-center gap-3 text-slate-400 hover:text-pink-600 transition active:scale-125">
-                            <i class="fas fa-heart ${p.likes > 0 ? 'text-pink-500' : ''} text-xl"></i>
-                            <span class="font-bold text-slate-600">${p.likes || 0} ไลก์</span>
-                        </button>
-                        <button class="text-slate-300 hover:text-blue-600 transition-colors"><i class="fas fa-share-nodes text-xl"></i></button>
-                    </div>
-                </article>
-            `).join('');
+        // ฟังก์ชันปิดหน้าต่างทันที
+        function forceCloseModal() {
+            const modal = document.getElementById('lockedModal');
+            modal.classList.add('hidden');
+            if(timerInterval) clearInterval(timerInterval);
         }
 
-        // --- GLOBAL ACTIONS ---
-        window.enterSite = (role) => {
-            if (role === 'admin') {
-                const pass = prompt("ใส่รหัสผ่านแอดมิน (1234)");
-                if (pass !== "1234") return alert("ผิดพลาด!");
-                document.body.classList.add('is-admin');
-                document.getElementById('adminBadge').classList.remove('hidden');
-            }
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('appUI').classList.remove('hidden');
-            startAutoCycle();
-            renderP3(); // อัปเดต UI เพื่อแสดงปุ่มลบหากเป็นแอดมิน
-        };
-
-        window.saveP3 = async () => {
-            const img = document.getElementById('p3Img').value;
-            if (!img || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'banners'), { img, time: Date.now() });
-            document.getElementById('p3Img').value = '';
-        };
-
-        window.saveP2 = async () => {
-            const title = document.getElementById('p2Title').value;
-            const img = document.getElementById('p2Img').value;
-            if (!title || !img || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'recommends'), { title, img, time: Date.now() });
-            document.getElementById('p2Title').value = '';
-            document.getElementById('p2Img').value = '';
-        };
-
-        window.saveP1 = async () => {
-            const title = document.getElementById('p1Title').value;
-            const content = document.getElementById('p1Content').value;
-            const img = document.getElementById('p1Img').value;
-            if (!title || !content || !user) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), { 
-                title, content, img, likes: 0, time: Date.now() 
-            });
-            document.getElementById('p1Title').value = '';
-            document.getElementById('p1Content').value = '';
-            document.getElementById('p1Img').value = '';
-        };
-
-        window.delDoc = async (col, id) => {
-            if (!confirm("คุณต้องการลบใช่หรือไม่?") || !user) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
-        };
-
-        window.likePost = async (id) => {
-            if (!user) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', id);
-            await updateDoc(docRef, { likes: increment(1) });
-        };
-
-        // --- ANIMATIONS ---
-        window.slide = (n) => {
-            if (slideData.length === 0) return;
-            slideIndex = (slideIndex + n + slideData.length) % slideData.length;
-            updateSlider();
-        };
-
-        function updateSlider() {
-            const el = document.getElementById('slider');
-            if (el) el.style.transform = `translateX(-${slideIndex * 100}%)`;
-        }
-
-        function startAutoCycle() {
-            setInterval(() => window.slide(1), 6000);
-            setInterval(() => {
-                const el = document.getElementById('recommendedScroll');
-                if (!el) return;
-                if (el.scrollLeft + el.clientWidth >= el.scrollWidth) el.scrollTo({ left: 0, behavior: 'smooth' });
-                else el.scrollBy({ left: 320, behavior: 'smooth' });
-            }, 8000);
-        }
     </script>
 </body>
 </html>
