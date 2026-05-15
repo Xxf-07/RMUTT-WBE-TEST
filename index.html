@@ -7,7 +7,9 @@
     <!-- โหลด Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- โหลดฟอนต์ -->
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Mali:wght@400;600&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Mali:wght@400;600&family=Quicksand:wght@600;700&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -25,8 +27,9 @@
         /* ฟอนต์ */
         .font-cihuy { font-family: 'Cihuy', 'Caveat', cursive; }
         .font-quicksand { font-family: 'Quicksand', sans-serif; }
+        .font-prompt { font-family: 'Prompt', sans-serif; }
 
-        /* พื้นหลังตัวอักษร */
+        /* พื้นหลังตัวอักษรหน้าหลัก */
         .bg-text-container {
             position: fixed;
             top: 0;
@@ -77,12 +80,113 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
 
-        /* สไตล์สำหรับหน้า Valentine Game ป้องกันปุ่มทะลุจอ */
-        #gift-message-page {
-            overflow: hidden;
+        /* ---------------- สไตล์สำหรับหน้า Sorry ---------------- */
+        .sorry-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 90%;
+            max-width: 500px;
+            min-height: 500px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            color: #555;
+            text-align: center;
         }
-        #yes-btn {
-            transition: all 0.2s ease;
+
+        .sorry-gif-container {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        img#sorry-catImage {
+            max-width: 180px;
+            max-height: 180px;
+            object-fit: contain;
+        }
+
+        .sorry-text-container {
+            min-height: 140px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+        }
+
+        h2#sorry-questionText {
+            font-size: 22px;
+            color: #ff6b81;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        p#sorry-subtitleText {
+            font-size: 16px;
+            margin: 0;
+            line-height: 1.6;
+            color: #777;
+        }
+
+        .sorry-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            min-height: 50px;
+            width: 100%;
+        }
+
+        .sorry-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Prompt', sans-serif;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .sorry-btn:active {
+            transform: scale(0.92);
+        }
+
+        .sorry-btn.yes {
+            background-color: #ffcad4;
+            color: #a14552;
+            box-shadow: 0 4px 0 #f8abb9;
+        }
+
+        .sorry-btn.yes:hover {
+            background-color: #f8abb9;
+            transform: translateY(-2px);
+        }
+
+        .sorry-btn.no {
+            background-color: #f1f3f5;
+            color: #868e96;
+            border: 1px solid #e9ecef;
+        }
+
+        .sorry-btn.no:hover {
+            background-color: #e9ecef;
+        }
+        
+        .fade-in-sorry {
+            animation: fadeInSorry 0.4s ease-out;
+        }
+
+        @keyframes fadeInSorry {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -110,8 +214,8 @@
                 <p class="text-pink-200 opacity-80">เลือกกล่องความทรงจำด้านล่างได้เลย บางกล่องอาจต้องรอเวลาหน่อยนะ!</p>
             </div>
 
-            <!-- Grid การ์ดตัวเลือก 4 อย่าง -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <!-- Grid การ์ดตัวเลือก 5 อย่าง -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
                 
                 <!-- Card 1: Gift Message -->
                 <div class="card rounded-2xl overflow-hidden flex flex-col">
@@ -119,7 +223,6 @@
                     <div class="p-6 flex-1 flex flex-col">
                         <h3 class="text-xl font-bold text-pink-400 mb-2">Gift Message</h3>
                         <p class="text-gray-400 text-sm mb-6 flex-1">ข้อความบอกรักและความในใจที่มีให้เธอเสมอ</p>
-                        <!-- กดเพื่อเปิดหน้า Valentine -->
                         <button onclick="checkAccess('message')" class="w-full py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-colors duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)]">
                             Go To
                         </button>
@@ -149,6 +252,364 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Card 4: Valentineday -->
+                <div class="card rounded-2xl overflow-hidden flex flex-col">
+                    <div class="cover-img h-48 w-full">💝</div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-pink-400 mb-2">Valentineday</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-1">แฮปปี้วาเลนไทน์ที่รัก (เปิดได้ 14/02/27)</p>
+                        <button onclick="checkAccess('valentine')" class="w-full py-3 rounded-full border-2 border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white font-semibold transition-colors duration-300">
+                            Go To
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 5: Sorry (ง้อแฟน) -->
+                <div class="card rounded-2xl overflow-hidden flex flex-col border-pink-300/50">
+                    <div class="cover-img h-48 w-full">🥺</div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-[#ff6b81] mb-2">Sorry</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-1">เค้าขอโทษนะ...ให้โอกาสเค้าอีกครั้งได้ไหม</p>
+                        <button onclick="checkAccess('sorry')" class="w-full py-3 rounded-full bg-[#ffcad4] hover:bg-[#f8abb9] text-[#a14552] font-semibold transition-colors duration-300 shadow-[0_0_15px_rgba(255,202,212,0.4)]">
+                            Go To
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= หน้า Gift Message (Valentine Game) ================= -->
+    <div id="gift-message-page" class="hidden fixed inset-0 z-50 flex-col items-center justify-center bg-[#fde4e9] font-quicksand w-full h-full overflow-hidden">
+        <h1 id="question" class="text-[#d32f2f] text-4xl md:text-5xl font-bold mb-5 text-center z-10 px-4">Will you be my Valentine?</h1>
+        <img id="cat-img" src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW5iMjBibzc2eTh1OWJnaDZ6Znd3a3c0a2oxMHI1djVpZ2V5dWdsNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/VM1fcpu2bKs1e2Kdbj/giphy.gif" alt="Cute Cat" class="h-[200px] md:h-[250px] mb-8 z-10">
+        <div class="flex flex-row items-center justify-center gap-4 z-10" id="val-buttons">
+            <button id="yes-btn" onclick="handleYesClick()" class="bg-[#4CAF50] hover:bg-[#45a049] text-white font-bold py-3 px-6 rounded-lg shadow-md text-xl transition-all duration-200">Yes</button>
+            <button id="no-btn" onclick="handleNoClick()" class="bg-[#f44336] hover:bg-[#d32f2f] text-white font-bold py-3 px-6 rounded-lg shadow-md text-xl">No</button>
+        </div>
+        <button id="home-btn" onclick="goHomeFromValentine()" class="hidden mt-5 bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold py-3 px-6 rounded-lg shadow-md text-xl z-10 transition-all">Home</button>
+    </div>
+
+    <!-- ================= หน้า Sorry (ง้อแฟน) ================= -->
+    <div id="sorry-page" class="hidden fixed inset-0 z-50 flex-col items-center justify-center bg-[#ffeef2] font-prompt w-full h-full">
+        <div class="sorry-container fade-in-sorry" id="sorry-app">
+            <div class="sorry-gif-container">
+                <img id="sorry-catImage" src="" alt="cat character">
+            </div>
+            
+            <div class="sorry-text-container">
+                <h2 id="sorry-questionText"></h2>
+                <p id="sorry-subtitleText"></p>
+            </div>
+            
+            <div class="sorry-buttons" id="sorry-buttons-div">
+                <button class="sorry-btn yes" id="sorry-yesBtn" onclick="nextSorryStep(true)"></button>
+                <button class="sorry-btn no" id="sorry-noBtn" onclick="nextSorryStep(false)"></button>
+            </div>
+
+            <!-- ปุ่ม Home ที่จะโผล่มาตอนง้อสำเร็จแล้ว -->
+            <button id="sorry-home-btn" onclick="goHomeFromSorry()" class="hidden mt-5 bg-[#ffcad4] hover:bg-[#f8abb9] text-[#a14552] font-bold py-2 px-6 rounded-full shadow-md text-lg transition-all">
+                กลับหน้าหลัก
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= Modals แจ้งเตือน ================= -->
+    <div id="lockedModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModalIfAllowed()"></div>
+        <div class="bg-gray-900 border border-pink-500 rounded-3xl p-8 max-w-md w-full relative z-10 shadow-[0_0_30px_rgba(255,105,180,0.3)] modal-animate text-center">
+            <div class="text-5xl mb-4">🔒</div>
+            <h3 class="text-2xl font-bold text-pink-400 mb-2">ยังไม่ถึงเวลาเปิด!</h3>
+            <p class="text-gray-300 mb-8">ยังไม่ถึงวันเวลาที่กำหนด รอก่อนน้าาา 💖</p>
+            <button id="closeModalBtn" class="w-full py-3 rounded-xl bg-gray-700 text-gray-400 font-semibold cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2" disabled>
+                ปิดหน้าต่าง <span id="countdownSpan" class="font-normal">(รอ 3 วินาที)</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="successModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="bg-gray-900 border border-pink-500 rounded-3xl p-8 max-w-md w-full relative z-10 shadow-[0_0_30px_rgba(255,105,180,0.5)] modal-animate text-center">
+            <div class="text-5xl mb-4">🔓💖</div>
+            <h3 class="text-2xl font-bold text-pink-400 mb-2">ถึงเวลาแล้ว!</h3>
+            <p class="text-gray-300 mb-8">คุณสามารถเปิดเข้าไปดูข้อความได้เลย</p>
+            <button onclick="document.getElementById('successModal').classList.add('hidden')" class="w-full py-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)]">
+                เข้าใจแล้ว
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= Scripts ================= -->
+    <script>
+        // --- 1. ระบบพื้นหลัง I LOVE MEI ---
+        function generateBackgroundText() {
+            const container = document.getElementById('bg-text-container');
+            const numTexts = 40;
+            for (let i = 0; i < numTexts; i++) {
+                const span = document.createElement('span');
+                span.innerText = "I LOVE MEI";
+                span.className = "floating-text font-cihuy font-bold";
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                const scale = 0.5 + Math.random() * 1.5;
+                const rotation = (Math.random() * 60) - 30;
+                const opacity = 0.05 + Math.random() * 0.15;
+                span.style.left = `${left}vw`;
+                span.style.top = `${top}vh`;
+                span.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+                span.style.opacity = opacity;
+                container.appendChild(span);
+            }
+        }
+        window.onload = generateBackgroundText;
+
+        // --- 2. ระบบเช็คเวลาเข้าถึงกล่อง ---
+        const targetDates = {
+            'message': new Date(0).getTime(), 
+            'sorry': new Date(0).getTime(), // ปลดล็อคตลอดเวลาสำหรับหน้าง้อแฟน
+            'birthday': new Date('2026-07-06T00:00:00').getTime(),
+            'anniversary': new Date('2027-04-16T00:00:00').getTime(),
+            'valentine': new Date('2027-02-14T00:00:00').getTime()
+        };
+
+        let timerInterval;
+        let isModalClosable = false;
+
+        function checkAccess(type) {
+            if (type === 'message') {
+                document.getElementById('main-view').classList.add('hidden');
+                const valPage = document.getElementById('gift-message-page');
+                valPage.classList.remove('hidden');
+                valPage.classList.add('flex');
+                return;
+            }
+            if (type === 'sorry') {
+                document.getElementById('main-view').classList.add('hidden');
+                const sorryPage = document.getElementById('sorry-page');
+                sorryPage.classList.remove('hidden');
+                sorryPage.classList.add('flex');
+                updateSorryContent(); // เรียกใช้งานหน้าง้อเริ่มต้น
+                return;
+            }
+
+            const currentDate = new Date().getTime();
+            const unlockDate = targetDates[type];
+
+            if (currentDate >= unlockDate) {
+                document.getElementById('successModal').classList.remove('hidden');
+            } else {
+                showLockedModal();
+            }
+        }
+
+        // --- 3. ระบบ Modal ล็อคเวลา ---
+        function showLockedModal() {
+            const modal = document.getElementById('lockedModal');
+            const closeBtn = document.getElementById('closeModalBtn');
+            const countdownSpan = document.getElementById('countdownSpan');
+            
+            modal.classList.remove('hidden');
+            isModalClosable = false;
+            closeBtn.disabled = true;
+            closeBtn.className = "w-full py-3 rounded-xl bg-gray-700 text-gray-400 font-semibold cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2";
+            
+            let timeLeft = 3;
+            countdownSpan.innerText = `(รอ ${timeLeft} วินาที)`;
+
+            if(timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isModalClosable = true;
+                    closeBtn.disabled = false;
+                    closeBtn.className = "w-full py-3 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(255,105,180,0.4)] cursor-pointer";
+                    countdownSpan.innerText = ""; 
+                    closeBtn.onclick = forceCloseModal;
+                } else {
+                    countdownSpan.innerText = `(รอ ${timeLeft} วินาที)`;
+                }
+            }, 1000);
+        }
+
+        function closeModalIfAllowed() {
+            if (isModalClosable) forceCloseModal();
+        }
+
+        function forceCloseModal() {
+            document.getElementById('lockedModal').classList.add('hidden');
+            if(timerInterval) clearInterval(timerInterval);
+        }
+
+        // --- 4. ระบบเปิด/ปิด หน้า Gift Message (Valentine Game) ---
+        function goHomeFromValentine() {
+            const valPage = document.getElementById('gift-message-page');
+            valPage.classList.add('hidden');
+            valPage.classList.remove('flex');
+            document.getElementById('main-view').classList.remove('hidden');
+            resetValentineGame();
+        }
+
+        const noButtonTexts = [
+            "No", "Are you sure?", "Really sure??", "Are you positive?", 
+            "Pookie please...", "Just think about it!", "If you say no, I will be really sad...", 
+            "I will be very sad...", "I will be very very very sad..."
+        ];
+
+        let noClickCount = 0;
+        let yesButtonSize = 1.25;
+        let yesButtonPaddingV = 12;
+        let yesButtonPaddingH = 24;
+
+        function handleNoClick() {
+            noClickCount++;
+            const noBtn = document.getElementById("no-btn");
+            const yesBtn = document.getElementById("yes-btn");
+            const textIndex = Math.min(noClickCount, noButtonTexts.length - 1);
+            noBtn.innerText = noButtonTexts[textIndex];
+
+            yesButtonSize += 0.8; 
+            yesButtonPaddingV += 5;
+            yesButtonPaddingH += 10;
+            yesBtn.style.fontSize = yesButtonSize + "rem";
+            yesBtn.style.padding = `${yesButtonPaddingV}px ${yesButtonPaddingH}px`;
+        }
+
+        function handleYesClick() {
+            document.getElementById("question").innerText = "Knew you would say yes!";
+            document.getElementById("cat-img").src = "https://media.tenor.com/6foaT9raMTcAAAAj/bug-cat.gif";
+            document.getElementById("val-buttons").style.display = "none";
+            const homeBtn = document.getElementById("home-btn");
+            homeBtn.classList.remove('hidden');
+            homeBtn.style.display = "inline-block";
+        }
+
+        function resetValentineGame() {
+            noClickCount = 0;
+            yesButtonSize = 1.25;
+            yesButtonPaddingV = 12;
+            yesButtonPaddingH = 24;
+            const yesBtn = document.getElementById("yes-btn");
+            yesBtn.style.fontSize = ""; 
+            yesBtn.style.padding = "";
+            document.getElementById("no-btn").innerText = "No";
+            document.getElementById("question").innerText = "Will you be my Valentine?";
+            document.getElementById("cat-img").src = "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW5iMjBibzc2eTh1OWJnaDZ6Znd3a3c0a2oxMHI1djVpZ2V5dWdsNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/VM1fcpu2bKs1e2Kdbj/giphy.gif";
+            document.getElementById("val-buttons").style.display = "flex";
+            const homeBtn = document.getElementById("home-btn");
+            homeBtn.style.display = "";
+            homeBtn.classList.add('hidden');
+        }
+
+
+        // --- 5. ระบบหน้า Sorry (ง้อแฟน) ของคุณ ---
+        const sorryContentData = [
+            {
+                image: 'https://media1.tenor.com/m/dVWO6T4y7r8AAAAd/kittycass-peachcat.gif',
+                question: 'ที่รัก...ยกโทษให้เค้าได้ไหม ?',
+                subtitle: 'เค้ารู้ว่าครั้งนี้เค้าผิดแต่อยากขอโอกาสอีกครั้งจริงๆ',
+                yesBtn: 'ยกโทษ',
+                noBtn: 'ไม่ยกโทษ'
+            },
+            {
+                image: 'https://media.tenor.com/3kTx2ByP8oQAAAAj/mochi-mochi-peach-cat-gif-mochi-cat.gif',
+                question: 'แน่ใจเหรอ...ไม่ใจอ่อนจริงๆ เหรอ',
+                subtitle: 'เค้าสัญญาว่าจะตั้งใจฟัง และไม่ทำให้ที่รักเสียใจแบบนี้อีก',
+                yesBtn: 'เริ่มใจอ่อนแล้วนะ',
+                noBtn: 'ยังไม่ยกโทษ'
+            },
+            {
+                image: 'https://media1.tenor.com/m/7o7Wok6zfD0AAAAd/kittycass-peachcat.gif',
+                question: 'เค้าง้อจริงจังนะ',
+                subtitle: 'ไม่มีข้อแก้ตัวเลยมีแต่ความรู้สึกผิดกับความรักที่ให้ไปเต็มหัวใจ',
+                yesBtn: 'ยกโทษให้ก็ได้...',
+                noBtn: 'ใจแข็งอยู่'
+            },
+            {
+                image: 'https://media.tenor.com/XBVx13mJz2wAAAAi/ear-wiggle-naughty.gif',
+                question: 'ถ้ายังไม่ยกโทษ เค้าจะง้อต่อ',
+                subtitle: 'เพราะเค้าไม่อยากเสียที่รักไป และไม่อยากเริ่มต้นวันไหนโดยไม่มีรอยยิ้มของที่รัก',
+                yesBtn: 'โอเค...ยกโทษก็ได้',
+                noBtn: 'ยังไม่!!!'
+            },
+            {
+                image: 'https://media.tenor.com/5UTM_jsCSoEAAAAj/pom-peach.gif',
+                question: 'งั้นเค้ายอมแล้วก็ได้...แต่รักจริงนะ',
+                subtitle: 'ต่อให้โดนกดไม่ยกโทษกี่รอบ เค้าก็ยังอยากง้อคนเดิมอยู่ดี',
+                yesBtn: 'ยกโทษให้ก็ได้...', 
+                noBtn: '' 
+            },
+            {
+                image: 'https://media1.tenor.com/m/1nIDXbABxgsAAAAC/gif-gifkk.gif',
+                question: 'ขอบคุณที่ยกโทษให้เค้านะ',
+                subtitle: 'เค้าอาจไม่ใช่คนที่สมบูรณ์แบบ แต่จะเป็นคนที่รักที่รักให้ดีที่สุด From now on, I will be more careful with your heart and not let you get hurt easily again.<br><br>รักนะ และอยากจับมือไปด้วยกันต่อ',
+                yesBtn: '',
+                noBtn: ''
+            }
+        ];
+
+        let sorryCurrentStep = 0;
+
+        function updateSorryContent() {
+            const data = sorryContentData[sorryCurrentStep];
+            const app = document.getElementById('sorry-app');
+            
+            document.getElementById('sorry-catImage').src = data.image;
+            document.getElementById('sorry-questionText').innerText = data.question;
+            document.getElementById('sorry-subtitleText').innerHTML = data.subtitle;
+            document.getElementById('sorry-yesBtn').innerText = data.yesBtn;
+            document.getElementById('sorry-noBtn').innerText = data.noBtn;
+
+            document.getElementById('sorry-yesBtn').style.display = data.yesBtn ? 'inline-block' : 'none';
+            document.getElementById('sorry-noBtn').style.display = data.noBtn ? 'inline-block' : 'none';
+            
+            // ถ้ามาถึงหน้าสุดท้ายที่ไม่มีปุ่มแล้ว ให้โชว์ปุ่ม Home
+            if(!data.yesBtn && !data.noBtn) {
+                document.getElementById('sorry-buttons-div').style.display = 'none';
+                document.getElementById('sorry-home-btn').classList.remove('hidden');
+                document.getElementById('sorry-home-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('sorry-buttons-div').style.display = 'flex';
+                document.getElementById('sorry-home-btn').classList.add('hidden');
+                document.getElementById('sorry-home-btn').style.display = 'none';
+            }
+
+            // รีเซ็ต Animation
+            app.classList.remove('fade-in-sorry');
+            void app.offsetWidth; 
+            app.classList.add('fade-in-sorry');
+        }
+
+        function nextSorryStep(isYes) {
+            if (sorryCurrentStep < sorryContentData.length - 1) {
+                sorryCurrentStep++;
+                updateSorryContent();
+            }
+        }
+
+        function goHomeFromSorry() {
+            const sorryPage = document.getElementById('sorry-page');
+            sorryPage.classList.add('hidden');
+            sorryPage.classList.remove('flex');
+            
+            document.getElementById('main-view').classList.remove('hidden');
+
+            // รีเซ็ตหน้าง้อแฟนเผื่อกดเข้ามาใหม่
+            sorryCurrentStep = 0;
+            document.getElementById('sorry-buttons-div').style.display = 'flex';
+            document.getElementById('sorry-home-btn').classList.add('hidden');
+            document.getElementById('sorry-home-btn').style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
+```eof
+
+กล่องที่ 5 ถูกจัดวางลง Grid อย่างสวยงามแล้วครับ! ลองกดเล่นและเทสได้เลยครับผม 😊
 
                 <!-- Card 4: Valentineday -->
                 <div class="card rounded-2xl overflow-hidden flex flex-col">
